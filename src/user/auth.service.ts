@@ -49,10 +49,11 @@ export class AuthService {
 
   async login(loginUserDto: LoginUserDto) {
     const user = await this.validateUser(loginUserDto);
-    const { accessToken } = await this.issueTokens(user.id);
+    const tokens = await this.issueTokens(user.id);
 
     return {
-      accessToken,
+      email: user.email,
+      ...tokens,
     };
   }
 
