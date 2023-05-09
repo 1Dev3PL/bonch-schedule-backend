@@ -1,16 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { RegisterUserDto } from './dto/register-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { hash } from 'argon2';
+import { hash, verify } from 'argon2';
 
 @Injectable()
 export class AuthService {
   constructor(private prisma: PrismaService, private jwt: JwtService) {}
 
-  async create(createUserDto: CreateUserDto) {
-    const { email, password } = createUserDto;
+  async register(registerUserDto: RegisterUserDto) {
+    const { email, password } = registerUserDto;
 
     const oldUser = await this.prisma.user.findUnique({
       where: {
@@ -27,9 +32,10 @@ export class AuthService {
       },
     });
 
-    const tokens = await this.issueTokens(oldUser.id);
+    const tokens = await this.issueTokens(user.id);
 
     return {
+      user: this.returnUserFields(registerUserDto),
       ...tokens,
     };
   }
@@ -41,16 +47,13 @@ export class AuthService {
     };
   }
 
-  async findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
+  async login(loginUserDto: LoginUserDto) {
+    const user = await this.validateUser(loginUserDto);
+    const { accessToken } = await this.issueTokens(user.id);
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  async remove(id: number) {
-    return `This action removes a #${id} user`;
+    return {
+      accessToken,
+    };
   }
 
   private async issueTokens(userId: number) {
@@ -67,9 +70,27 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  private returnUserFields(createUserDto: CreateUserDto) {
+  private returnUserFields(registerUserDto: RegisterUserDto) {
     return {
-      email: createUserDto.email,
+      email: registerUserDto.email,
     };
+  }
+
+  private async validateUser(loginUserDto: LoginUserDto) {
+    const { email, password } = loginUserDto;
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) throw new NotFoundException('User not exist');
+
+    const isValidPassword = await verify(user.password, loginUserDto.password);
+
+    if (!isValidPassword) throw new UnauthorizedException('Password invalid');
+
+    return user;
   }
 }
