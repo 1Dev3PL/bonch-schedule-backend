@@ -3,7 +3,7 @@ module.exports = {
   parserOptions: {
     project: 'tsconfig.json',
     tsconfigRootDir: __dirname,
-    sourceType: 'module',
+    sourceType: 'script'
   },
   plugins: ['@typescript-eslint/eslint-plugin'],
   extends: [
@@ -21,5 +21,8 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
+    "prettier/prettier": ["error",{
+      "endOfLine": "auto"}
+    ]
   },
 };
