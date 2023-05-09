@@ -3,6 +3,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { hash } from 'argon2';
 
 @Injectable()
 export class AuthService {
@@ -17,25 +18,27 @@ export class AuthService {
       },
     });
 
-    if (oldUser) throw new BadRequestException('User not exist');
+    if (oldUser) throw new BadRequestException('User already exist');
 
     const user = await this.prisma.user.create({
       data: {
         email: email,
-        password: password,
+        password: await hash(password),
       },
     });
 
     const tokens = await this.issueTokens(oldUser.id);
 
     return {
-      user: this.returnUserFields(createUserDto),
       ...tokens,
     };
   }
 
   async findAll() {
-    return `This action returns all user`;
+    const users = await this.prisma.user.findMany();
+    return {
+      users: users,
+    };
   }
 
   async findOne(id: number) {

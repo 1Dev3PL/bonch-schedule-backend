@@ -6,7 +6,7 @@ import { PrismaService } from './prisma.service';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [forwardRef(() => AuthModule), ConfigModule.forRoot()],
+  imports: [AuthModule, ConfigModule.forRoot()],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })
