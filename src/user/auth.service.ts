@@ -35,7 +35,7 @@ export class AuthService {
     const tokens = await this.issueTokens(user.id);
 
     return {
-      user: this.returnUserFields(registerUserDto),
+      email: user.createdAt,
       ...tokens,
     };
   }
@@ -43,7 +43,7 @@ export class AuthService {
   async findAll() {
     const users = await this.prisma.user.findMany();
     return {
-      users: users,
+      ...users,
     };
   }
 
