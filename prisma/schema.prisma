@@ -18,3 +18,18 @@ model User {
   name      String?
   avatar    String?
 }
+
+model Schedule {
+  id        Int    @id @default(autoincrement())
+  faculty   String
+  group     String
+  date      String
+  dayOfWeek String
+  pairNum   String
+  pairStart String
+  pairEnd   String
+  pairTitle String
+  teacher   String
+  auditory  String
+  pairType  String
+}

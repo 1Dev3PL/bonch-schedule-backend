@@ -4,10 +4,11 @@ import { AppService } from './app.service';
 import { AuthModule } from './user/auth.module';
 import { PrismaService } from './prisma.service';
 import { ConfigModule } from '@nestjs/config';
+import { ParserService } from './parser/parser.service';
 
 @Module({
   imports: [AuthModule, ConfigModule.forRoot()],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService, PrismaService, ParserService],
 })
 export class AppModule {}
