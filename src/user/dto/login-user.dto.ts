@@ -5,3 +5,8 @@ export class LoginUserDto extends PartialType(RegisterUserDto) {
   email: string;
   password: string;
 }
+
+export class IsRightPassword {
+  email: string;
+  password: string;
+}

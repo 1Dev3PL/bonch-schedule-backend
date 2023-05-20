@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+import { LoginUserDto, IsRightPassword } from './dto/login-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -18,6 +18,11 @@ export class AuthController {
   @Post('register')
   register(@Body() RegisterUserDto: RegisterUserDto) {
     return this.userService.register(RegisterUserDto);
+  }
+
+  @Get('password')
+  isRightPassword(@Body() data: IsRightPassword) {
+    return this.userService.isRightPassword(data);
   }
 
   @Post('login')
