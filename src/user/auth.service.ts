@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { RegisterUserDto } from './dto/register-user.dto';
-import { LoginUserDto } from './dto/login-user.dto';
+import { IsRightPassword, LoginUserDto } from './dto/login-user.dto';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { hash, verify } from 'argon2';
@@ -35,15 +35,37 @@ export class AuthService {
     const tokens = await this.issueTokens(user.id);
 
     return {
-      user: this.returnUserFields(registerUserDto),
+      email: user.createdAt,
       ...tokens,
     };
+  }
+
+  async isRightPassword(data: IsRightPassword) {
+    const { email, password } = data;
+
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+
+    if (!user) {
+      return false;
+    }
+
+    const isPassword = await verify(user.password, password);
+
+    if (!isPassword) {
+      return false;
+    }
+
+    return true;
   }
 
   async findAll() {
     const users = await this.prisma.user.findMany();
     return {
-      users: users,
+      users,
     };
   }
 
