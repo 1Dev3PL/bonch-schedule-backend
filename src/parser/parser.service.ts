@@ -1,27 +1,59 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import axios from 'axios';
 import * as cheerio from 'cheerio';
-import eachWeekOfInterval from 'date-fns/eachWeekOfInterval';
+import { eachWeekOfInterval } from 'date-fns';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+
+type PairType = {
+  faculty: string;
+  group: string;
+  date: string;
+  dayOfWeek: string;
+  pairNum: string;
+  pairStart: string;
+  pairEnd: string;
+  pairTitle: string;
+  teacher: string;
+  auditory: string;
+  pairType: string;
+};
+
+type GroupType = {
+  facultyTitle: string;
+  groupId: number;
+};
+
+type StoreType = {
+  groups: {
+    [groupTitle: string]: GroupType;
+  };
+  schedule: PairType[];
+};
 
 @Injectable()
 export class ParserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly httpService: HttpService,
+  ) {}
 
-  private readonly URL: 'https://www.sut.ru/studentu/raspisanie/raspisanie-zanyatiy-studentov-ochnoy-i-vecherney-form-obucheniya';
-  private store: any = {
+  //Хранилище групп и распсания
+  private store: StoreType = {
     groups: {},
     schedule: [],
-  }; //Хранилище групп и распсания
+  };
 
-  private async getHTML(url: string) {
-    const { data } = await axios.get(url);
+  async getHTML(url: string) {
+    const { data } = await firstValueFrom(this.httpService.get(url));
     return cheerio.load(data);
   }
 
   //Засетать группы в store
-  private async getGroups() {
-    const $ = await this.getHTML(this.URL);
+  async parseGroups() {
+    const $ = await this.getHTML(
+      'https://www.sut.ru/studentu/raspisanie/raspisanie-zanyatiy-studentov-ochnoy-i-vecherney-form-obucheniya',
+    );
 
     $('.vt252').each((i, faculty) => {
       const facultyTitle = $(faculty).find($('.vt253')).text().trim();
@@ -40,14 +72,15 @@ export class ParserService {
   }
 
   //Получить расписание для группы на семестр
-  private async getSchedule() {
+  private async parseSchedule() {
+    //Пока сделал для одной группы и на последний месяц
     const group = 'ИКТ-211';
     const faculty = this.store.groups[group].facultyTitle;
     const groupId = this.store.groups[group].groupId;
     const weeks = eachWeekOfInterval(
       {
-        start: new Date('2023/02/01'),
-        end: new Date('2023/6/15'),
+        start: new Date('2023/05/01'),
+        end: new Date('2023/06/01'),
       },
       { weekStartsOn: 2 },
     ).map((d) => d.toISOString().split('T')[0]);
@@ -55,7 +88,7 @@ export class ParserService {
     for (const i in weeks) {
       const currentDate = weeks[i];
       const $ = await this.getHTML(
-        `${URL}?group=${groupId}&date=${currentDate}`,
+        `https://www.sut.ru/studentu/raspisanie/raspisanie-zanyatiy-studentov-ochnoy-i-vecherney-form-obucheniya?group=${groupId}&date=${currentDate}`,
       );
 
       $('.vt237')
@@ -111,31 +144,20 @@ export class ParserService {
         });
     }
 
-    this.prisma.schedule.createMany({
+    await this.prisma.schedule.createMany({
       data: this.store.schedule,
     });
   }
 
   async parse() {
-    await this.getGroups();
-    await this.getSchedule();
+    await this.parseGroups();
+    await this.parseSchedule();
   }
 
-  async getTest() {
-    const data = await axios.get(
-      'https://jsonplaceholder.typicode.com/posts/1',
-    );
-    console.log(data);
-
+  async getSchedule() {
+    const data = await this.prisma.schedule.findMany();
     return {
       data,
-    };
-  }
-
-  async getData() {
-    const table = await this.prisma.schedule.findMany();
-    return {
-      table,
     };
   }
 }
