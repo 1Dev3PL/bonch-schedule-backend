@@ -6,7 +6,11 @@ import { Queue } from "bull";
 export class ParserProducerService {
   constructor(@InjectQueue('parser-queue') private queue: Queue) {}
 
+  async startGroupsParsing() {
+    await this.queue.add('parse-groups-job');
+  }
+
   async startScheduleParsing() {
-    await this.queue.add('parser-job');
+    await this.queue.add('parse-schedule-job');
   }
 }

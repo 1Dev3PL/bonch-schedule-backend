@@ -36,8 +36,13 @@ export class ParserConsumer {
     );
   }
 
-  @Process('parser-job')
-  async readOperationJob(job: Job<unknown>) {
-    await this.parserService.parse();
+  @Process('parse-groups-job')
+  async ParseGroupsJob(job: Job<unknown>) {
+    await this.parserService.parseGroups();
+  }
+
+  @Process('parse-schedule-job')
+  async ParseScheduleJob(job: Job<unknown>) {
+    await this.parserService.parseSchedule();
   }
 }
