@@ -6,10 +6,8 @@ import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
 type PairType = {
-  faculty: string;
   group: string;
   date: string;
-  dayOfWeek: string;
   pairNum: string;
   pairStart: string;
   pairEnd: string;
@@ -59,7 +57,7 @@ export class ParserService {
         });
     });
 
-    await this.prisma.groups.deleteMany({});
+    await this.prisma.groups.deleteMany();
     await this.prisma.groups.createMany({
       data: groups,
     });
@@ -79,7 +77,7 @@ export class ParserService {
     for (const groupObj of groups) {
       const groupId = groupObj.groupId;
       const group = groupObj.group;
-      const faculty = groupObj.faculty;
+      // const faculty = groupObj.faculty;
 
       for (const currentDate of weeks) {
         const $ = await this.getHTML(
@@ -97,7 +95,7 @@ export class ParserService {
             const date = `${new Date().getFullYear()}-${dateDDMM[1]}-${
               dateDDMM[0]
             }`;
-            const dayOfWeek = $(column).find('.vt238').text().trim();
+            // const dayOfWeek = $(column).find('.vt238').text().trim();
 
             $('.vt244b')
               .find('.vt244')
@@ -122,10 +120,8 @@ export class ParserService {
                   const pairType = $(pair).find('.vt243').text().trim();
 
                   schedule.push({
-                    faculty,
                     group,
                     date,
-                    dayOfWeek,
                     pairNum,
                     pairStart,
                     pairEnd,
@@ -138,9 +134,10 @@ export class ParserService {
               });
           });
       }
+      break;
     }
 
-    await this.prisma.schedule.deleteMany({})
+    await this.prisma.schedule.deleteMany({});
     await this.prisma.schedule.createMany({
       data: schedule,
     });

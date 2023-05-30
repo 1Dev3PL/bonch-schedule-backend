@@ -6,6 +6,9 @@ export class GroupsService {
   constructor(private prisma: PrismaService) {}
 
   async getGroups() {
-    return await this.prisma.groups.findMany();
+    const data = await this.prisma.groups.findMany();
+    return {
+      data,
+    };
   }
 }

@@ -21,10 +21,8 @@ model User {
 
 model Schedule {
   id        Int    @id @default(autoincrement())
-  faculty   String
   group     String
   date      String
-  dayOfWeek String
   pairNum   String
   pairStart String
   pairEnd   String
