@@ -4,10 +4,16 @@ import { AppService } from './app.service';
 import { AuthModule } from './user/auth.module';
 import { PrismaService } from './prisma.service';
 import { ConfigModule } from '@nestjs/config';
-import { ParserModule } from "./parser/parser.module";
+import { ParserModule } from './parser/parser.module';
+import { MailerConfigModule } from './user/auth.mailer.module';
 
 @Module({
-  imports: [AuthModule, ParserModule, ConfigModule.forRoot()],
+  imports: [
+    AuthModule,
+    ParserModule,
+    ConfigModule.forRoot(),
+    MailerConfigModule,
+  ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
 })

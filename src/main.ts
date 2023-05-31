@@ -11,10 +11,10 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors();
 
-  // await app.listen(3000, '192.168.31.214', function () {
-  //   console.log('server started on port 3000');
-  // });
+  await app.listen(4200, '192.168.31.214', function () {
+    console.log('server started on port 4200');
+  });
 
-  await app.listen(4200);
+  // await app.listen(4200);
 }
 bootstrap();

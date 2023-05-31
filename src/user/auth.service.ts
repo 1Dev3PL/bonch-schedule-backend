@@ -9,10 +9,15 @@ import { IsRightPassword, LoginUserDto } from './dto/login-user.dto';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { hash, verify } from 'argon2';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService, private jwt: JwtService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwt: JwtService,
+    private readonly mailerService: MailerService,
+  ) {}
 
   async register(registerUserDto: RegisterUserDto) {
     const { email, password } = registerUserDto;
@@ -115,5 +120,41 @@ export class AuthService {
     if (!isValidPassword) throw new UnauthorizedException('Password invalid');
 
     return user;
+  }
+
+  async forgot(email: string) {
+    const newPassword = this.generatePassword();
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Сброс пароля',
+      text: '',
+      html: `
+            <div>
+              <h1>Ваш новый пароль для входа 12345</h1>
+            </div>
+          `,
+    });
+
+    return {
+      message: 'Вы успешно сбросили пароль!',
+    };
+  }
+
+  private async generatePassword() {
+    let result = '';
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < this.randomIntFromInterval(6, 10)) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+  }
+
+  private randomIntFromInterval(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
   }
 }
