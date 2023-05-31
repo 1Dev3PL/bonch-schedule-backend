@@ -21,10 +21,8 @@ model User {
 
 model Schedule {
   id        Int    @id @default(autoincrement())
-  faculty   String
   group     String
   date      String
-  dayOfWeek String
   pairNum   String
   pairStart String
   pairEnd   String
@@ -32,4 +30,11 @@ model Schedule {
   teacher   String
   auditory  String
   pairType  String
+}
+
+model Groups {
+  id      Int    @id @default(autoincrement())
+  groupId Int    @unique
+  group   String
+  faculty String
 }
