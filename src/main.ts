@@ -11,7 +11,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors();
 
-  await app.listen(4200, '192.168.31.214', function () {
+  await app.listen(4200, '192.168.225.156', function () {
     console.log('server started on port 4200');
   });
 

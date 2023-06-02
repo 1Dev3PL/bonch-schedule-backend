@@ -128,12 +128,7 @@ export class AuthService {
     await this.mailerService.sendMail({
       to: email,
       subject: 'Сброс пароля',
-      text: '',
-      html: `
-            <div>
-              <h1>Ваш новый пароль для входа 12345</h1>
-            </div>
-          `,
+      template: './welcome', // `.hbs` extension is appended automatically
     });
 
     return {

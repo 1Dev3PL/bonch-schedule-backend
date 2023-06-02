@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ParserModule } from './parser/parser.module';
 import { ScheduleModule } from './schedule/schedule.module';
 import { GroupsModule } from './groups/groups.module';
+import { MailerConfigModule } from './user/auth.mailer.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { GroupsModule } from './groups/groups.module';
     ConfigModule.forRoot(),
     ScheduleModule,
     GroupsModule,
+    MailerConfigModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

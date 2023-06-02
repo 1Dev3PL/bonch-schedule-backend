@@ -134,7 +134,6 @@ export class ParserService {
               });
           });
       }
-      break;
     }
 
     await this.prisma.schedule.deleteMany({});
